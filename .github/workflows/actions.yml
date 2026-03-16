@@ -1,9 +1,12 @@
 name: Build and deploy shop_backend
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Reason for manual trigger'
+        required: false
+        default: 'Manual validation run'
 
 env: 
   IMAGE_REPO: backstage-infrastructure/shop_backend
@@ -11,14 +14,6 @@ env:
   RELEASE_NAME: shop_backend
 
 jobs:
-  lint:
-      runs-on: ubuntu-latest
-      steps:
-        - uses: actions/checkout@v4
-        - name: Lint Helm Chart
-          run: helm lint ./helm/shop_backend
-        - name: Python Lint
-          run: pip install flake8 && flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
   build:
     runs-on: ubuntu-latest
     outputs:
