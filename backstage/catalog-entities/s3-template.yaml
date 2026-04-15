@@ -1,0 +1,47 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: create-s3-bucket
+  title: Create AWS S3 Bucket
+  description: Provisions an S3 bucket using Terraform
+spec:
+  owner: platform-team
+  type: service
+
+  # 1. The Form devs fill out
+  parameters:
+    - title: Bucket Details
+      required: [bucketName, environment]
+      properties:
+        bucketName:
+          title: Bucket Name
+          type: string
+        environment:
+          title: Environment
+          type: string
+          enum: [development, staging, production]
+
+  # 2. The steps Backstage takes
+  steps:
+    - id: fetch-base
+      name: Fetch Terraform Template
+      action: fetch:template
+      input:
+        url: ./skeleton # Point to a folder with your .tf files
+        values:
+          bucketName: ${{ parameters.bucketName }}
+
+    - id: publish
+      name: Publish to GitHub
+      action: publish:github
+      input:
+        allowedHosts: ['github.com']
+        description: Terraform for ${{ parameters.bucketName }}
+        repoUrl: 'github.com?owner=my-org&repo=${{ parameters.bucketName }}-infra'
+
+    - id: register
+      name: Register in Catalog
+      action: catalog:register
+      input:
+        repoContentsUrl: ${{ steps['publish'].output.remoteUrl }}
+        catalogInfoPath: '/catalog-info.yaml'

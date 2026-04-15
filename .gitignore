@@ -14,3 +14,27 @@
 *.lock.hcl
 
 **__pycache__**
+
+# Dependency directories
+node_modules/
+packages/*/node_modules/
+plugins/*/node_modules/
+
+# Build outputs
+dist/
+build/
+packages/*/dist/
+plugins/*/dist/
+
+# Local configuration & Secrets
+*.local.yaml
+.env
+.env.*
+!.env.example
+
+# Log files
+yarn-error.log
+npm-debug.log*
+
+# TechDocs generated files
+site/
