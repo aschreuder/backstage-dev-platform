@@ -131,6 +131,9 @@ catalog:
     - type: file
       target: template.yaml
 
+    - type: url
+      target: https://github.com/aschreuder/backstage-dev-platform/blob/main/backstage/template.yaml
+
     # Local example template
     - type: file
       target: ../../examples/template/template.yaml
