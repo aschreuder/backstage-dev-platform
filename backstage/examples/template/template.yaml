@@ -2,87 +2,73 @@ apiVersion: scaffolder.backstage.io/v1beta3
 # https://backstage.io/docs/features/software-catalog/descriptor-format#kind-template
 kind: Template
 metadata:
-  name: example-nodejs-template
-  title: Example Node.js Template
-  description: An example template for the scaffolder that creates a simple Node.js service
+  name: Microservice
+  title: Create a microservice
+  description: Creating a microservice with or without a DB
 spec:
-  owner: user:guest
+  owner: platform-team
   type: service
 
-  # These parameters are used to generate the input form in the frontend, and are
-  # used to gather input data for the execution of the template.
+# 1. THE UI FORM
   parameters:
-    - title: Fill in some steps
-      required:
-        - name
+    - title: Provide Service Details
+      required: [component_id, language, db, team]
       properties:
-        name:
+        component_id:
           title: Name
           type: string
-          description: Unique name of the component
-          ui:autofocus: true
-          ui:options:
-            rows: 5
-    - title: Choose a location
-      required:
-        - repoUrl
-      properties:
-        repoUrl:
-          title: Repository Location
+          description: Unique name for the service (e.g., 'customer-api')
+        language:
+          title: Programming language
           type: string
-          ui:field: RepoUrlPicker
+          description: Choose the primary language for your service
+          enum:
+            - Python
+            - Go
+            - Java
+            - Node.js
+        db:
+          title: postgres DB
+          type: boolean
+          description: Select the option to add a postgres db
+        team:
+          title: Team
+          type: string
+          ui:field: OwnerPicker
           ui:options:
-            allowedHosts:
-              - github.com
+            allowedKinds: [Group]
 
-  # These steps are executed in the scaffolder backend, using data that we gathered
-  # via the parameters above.
-  steps:
-    # Each step executes an action, in this case one templates files into the working directory.
+steps:
     - id: fetch-base
-      name: Fetch Base
+      name: Generating Service Files
       action: fetch:template
       input:
-        url: ./content
-        values:
-          name: ${{ parameters.name }}
+        # This points to the folder containing your .tf, k8s, and Dockerfile
+        url: ./template 
+        
+        # This creates the new folder named after the component_id
+        targetPath: ./${{ parameters.component_id }} 
+        
+        # These are the variables available to your skeleton files
+#        values:
+#          name: ${{ parameters.component_id }}
+#          language: ${{ parameters.language }}
+#         useDb: ${{ parameters.db }}
+#          owner: ${{ parameters.team }}
 
-    # This step publishes the contents of the working directory to GitHub.
-    # If you or your organization prefer another default branch name over 'main'
-    # you can change that here.
-    - id: publish
-      name: Publish
-      action: publish:github
-      input:
-        description: This is ${{ parameters.name }}
-        repoUrl: ${{ parameters.repoUrl }}
-        defaultBranch: 'main'
+#    - id: publish
+#      name: Publishing to GitHub
+#      action: publish:github
+#      input:
+#        allowedHosts: ['github.com']
+#        description: 'New microservice for ${{ parameters.component_id }}'
+        # This creates a repo with the same name as the service
+#        repoUrl: 'github.com?aschreuder&repo=${{ parameters.component_id }}'
 
-    # The final step is to register our new component in the catalog.
-    - id: register
-      name: Register
-      action: catalog:register
-      input:
-        repoContentsUrl: ${{ steps['publish'].output.repoContentsUrl }}
-        catalogInfoPath: '/catalog-info.yaml'
-
-    # Let's notify the user that the template has completed using the Notification action
-    - id: notify
-      name: Notify
-      action: notification:send
-      input:
-        recipients: entity
-        entityRefs:
-          - user:default/guest
-        title: 'Template executed'
-        info: 'Your template has been executed'
-        severity: 'normal'
-
-  # Outputs are displayed to the user after a successful execution of the template.
-  output:
-    links:
-      - title: Repository
-        url: ${{ steps['publish'].output.remoteUrl }}
-      - title: Open in catalog
-        icon: catalog
-        entityRef: ${{ steps['register'].output.entityRef }}
+#    - id: register
+#      name: Registering in Catalog
+#      action: catalog:register
+#      input:
+        # This points to the catalog-info.yaml inside the new folder
+ #       repoContentsUrl: ${{ steps['publish'].output.remoteRepoUrl }}
+ #       catalogInfoPath: '/${{ parameters.component_id }}/catalog-info.yaml'

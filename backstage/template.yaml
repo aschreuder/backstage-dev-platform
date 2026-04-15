@@ -1,51 +1,74 @@
 apiVersion: scaffolder.backstage.io/v1beta3
+# https://backstage.io/docs/features/software-catalog/descriptor-format#kind-template
 kind: Template
 metadata:
-  name: standard-service
-  title: Standard Service with RDS
-  description: Creates a new repo with a Dockerfile, K8s manifests, and optional RDS.
+  name: Microservice
+  title: Create a microservice
+  description: Creating a microservice with or without a DB
 spec:
   owner: platform-team
   type: service
 
-  # 1. THE UI FORM
+# 1. THE UI FORM
   parameters:
     - title: Provide Service Details
-      required: [component_id, owner]
+      required: [component_id, language, db, team]
       properties:
         component_id:
           title: Name
           type: string
           description: Unique name for the service (e.g., 'customer-api')
-        owner:
-          title: Owner
+        language:
+          title: Programming language
+          type: string
+          description: Choose the primary language for your service
+          enum:
+            - Python
+            - Go
+            - Java
+            - Node.js
+        db:
+          title: postgres DB
+          type: boolean
+          description: Select the option to add a postgres db
+        team:
+          title: Team
           type: string
           ui:field: OwnerPicker
           ui:options:
             allowedKinds: [Group]
 
-  # 2. THE ACTIONS
-  steps:
+steps:
     - id: fetch-base
-      name: Fetching Template Files
+      name: Generating Service Files
       action: fetch:template
       input:
-        url: ./skeleton
-        values:
-          component_id: ${{ parameters.component_id }}
-          owner: ${{ parameters.owner }}
+        # This points to the folder containing your .tf, k8s, and Dockerfile
+        url: ./template 
+        
+        # This creates the new folder named after the component_id
+        targetPath: ./${{ parameters.component_id }} 
+        
+        # These are the variables available to your skeleton files
+#        values:
+#          name: ${{ parameters.component_id }}
+#          language: ${{ parameters.language }}
+#         useDb: ${{ parameters.db }}
+#          owner: ${{ parameters.team }}
 
-    - id: publish
-      name: Publishing to GitHub
-      action: publish:github
-      input:
-        allowedHosts: ['github.com']
-        description: 'New service: ${{ parameters.component_id }}'
-        repoUrl: 'github.com?owner=your-org&repo=${{ parameters.component_id }}'
+#    - id: publish
+#      name: Publishing to GitHub
+#      action: publish:github
+#      input:
+#        allowedHosts: ['github.com']
+#        description: 'New microservice for ${{ parameters.component_id }}'
+        # This creates a repo with the same name as the service
+#        repoUrl: 'github.com?aschreuder&repo=${{ parameters.component_id }}'
 
-    - id: register
-      name: Registering in Catalog
-      action: catalog:register
-      input:
-        repoContentsUrl: ${{ steps['publish'].output.remoteRepoUrl }}
-        catalogInfoPath: '/catalog-info.yaml'
+#    - id: register
+#      name: Registering in Catalog
+#      action: catalog:register
+#      input:
+        # This points to the catalog-info.yaml inside the new folder
+ #       repoContentsUrl: ${{ steps['publish'].output.remoteRepoUrl }}
+ #       catalogInfoPath: '/${{ parameters.component_id }}/catalog-info.yaml'
