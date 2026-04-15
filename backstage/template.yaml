@@ -2,38 +2,50 @@ apiVersion: scaffolder.backstage.io/v1beta3
 kind: Template
 metadata:
   name: standard-service
-  title: Create a new Microservice
+  title: Standard Service with RDS
+  description: Creates a new repo with a Dockerfile, K8s manifests, and optional RDS.
 spec:
+  owner: platform-team
+  type: service
+
+  # 1. THE UI FORM
   parameters:
-    - title: Basic Info
+    - title: Provide Service Details
+      required: [component_id, owner]
       properties:
         component_id:
-          title: Service Name
+          title: Name
           type: string
+          description: Unique name for the service (e.g., 'customer-api')
         owner:
           title: Owner
           type: string
           ui:field: OwnerPicker
-    - title: Infrastructure Options
-      properties:
-        include_rds:
-          title: Do you need a Database?
-          type: boolean
-          default: false
-steps:
-    - id: template
-      name: Generating the Files
+          ui:options:
+            allowedKinds: [Group]
+
+  # 2. THE ACTIONS
+  steps:
+    - id: fetch-base
+      name: Fetching Template Files
       action: fetch:template
       input:
-        url: ./skeleton # A folder containing your Dockerfile, k8s manifests, and tf files
+        url: ./skeleton
         values:
           component_id: ${{ parameters.component_id }}
-          include_rds: ${{ parameters.include_rds }}
+          owner: ${{ parameters.owner }}
 
     - id: publish
       name: Publishing to GitHub
       action: publish:github
       input:
         allowedHosts: ['github.com']
-        description: 'New service managed by IDP'
+        description: 'New service: ${{ parameters.component_id }}'
         repoUrl: 'github.com?owner=your-org&repo=${{ parameters.component_id }}'
+
+    - id: register
+      name: Registering in Catalog
+      action: catalog:register
+      input:
+        repoContentsUrl: ${{ steps['publish'].output.remoteRepoUrl }}
+        catalogInfoPath: '/catalog-info.yaml'
