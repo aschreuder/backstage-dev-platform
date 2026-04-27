@@ -1,24 +1,28 @@
-resource "azurerm_resource_group" "backstage" {
-  name     = "rg-backstage-01"
-  location = var.resource_group_location
-  tags     = { department = "SRE" }
+locals {
+  service_files = fileset("${path.module}/../backstage/infra_request/services", "*.yaml")
+
+  services = {
+    for file in local.service_files :
+    trimsuffix(file, ".yaml") => yamldecode(
+      file("${path.module}/../backstage/infra_request/services/${file}")
+    )
+  }
+
+  postgres_services = {
+    for name, svc in local.services :
+    name => svc
+    if try(svc.postgres.enabled, false)
+  }
 }
 
-module "storage_service" {
-  source = "./modules/azure_storage"
+module "postgres" {
+  for_each = local.postgres_services
 
-  # Passing variables to the module
-  storage_account_name     = "stbackstage01"
-  resource_group_name      = azurerm_resource_group.backstage.name
-  location                 = azurerm_resource_group.backstage.location
-  account_tier             = var.account_tier
-  account_replication_type = var.account_replication_type
-  access_tier              = var.access_tier
-  container_name           = "sre-data"
-  container_access_type    = var.container_access_type
-  
-  tags = {
-    project = "backstage-self-service"
-    owner   = "sre-team"
-  }
+  source = "./modules/rds-postgres"
+
+  service_name       = each.value.service_name
+  owner              = each.value.owner
+  engine_version     = each.value.postgres.engine_version
+  instance_class     = each.value.postgres.instance_class
+  allocated_storage  = each.value.postgres.allocated_storage
 }
