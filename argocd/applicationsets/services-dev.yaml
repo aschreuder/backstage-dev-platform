@@ -1,0 +1,37 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: services-dev
+  namespace: argocd
+spec:
+  generators:
+    - scmProvider:
+        github:
+          organization: aschreuder
+          allBranches: false
+          tokenRef:
+            secretName: github-token
+            key: token
+        filters:
+          - repositoryMatch: ".*"
+            pathsExist:
+              - kubernetes/overlays/dev/kustomization.yaml
+
+  template:
+    metadata:
+      name: '{{ repository }}-dev'
+    spec:
+      project: default
+      source:
+        repoURL: 'https://github.com/aschreuder/{{ repository }}.git'
+        targetRevision: main
+        path: k8s/overlays/dev
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{ repository }}-dev'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
