@@ -1,24 +1,9 @@
-variable "resource_group_location" {
+variable "vpc_id" {
   type        = string
-  default     = "westeurope"
-  description = "Location of the resource group."
+  description = "VPC ID where the RDS security group will be created."
 }
 
-variable "account_tier" {
-  type = string
-  description = "The storage account tier"
-}
-
-variable "account_replication_type" {
-  type = string
-}
-
-variable "access_tier" {
-  type = string
-}
-
-variable "container_access_type" {
-  type        = string
-  description = "Access type for the storage container"
-  default     = "private"
+variable "subnet_ids" {
+  type        = list(string)
+  description = "Private subnet IDs for the DB subnet group."
 }

@@ -1,7 +1,6 @@
-# Storage account variables
-account_tier              = "Standard"
-account_replication_type  = "LRS"
-access_tier               = "Hot"
+vpc_id = "vpc-0abc123456789"
 
-# Storage container variables
-container_access_type = "private"
+subnet_ids = [
+  "subnet-0aaa111",
+  "subnet-0bbb222"
+]

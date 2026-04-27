@@ -80,7 +80,7 @@ spec:
           Owner: ${{ parameters.team }}
           Requested capability: Postgres
         sourcePath: ./infra-request-output
-        targetPath: .
+        targetPath: ./infra_requests
 
     - id: publish
       name: Publishing to GitHub

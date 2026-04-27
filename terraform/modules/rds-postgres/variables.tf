@@ -1,42 +1,97 @@
-variable "storage_account_name" {
-  type = string
-
-    # Add a guardrail to ensure Devs adhere to naming convention
-    validation {
-        condition     = contains(["stbackstagecoredev01", "stbackstagecoreprod01", "stbackstagedatadev01"], var.storage_account_name)
-        error_message = "Error: The storage_account_name must be one of the pre-approved enterprise names."
-  }
+variable "service_name" {
+  type        = string
+  description = "Name of the service that owns this database."
 }
 
-variable "resource_group_name" {
-  type = string
+variable "owner" {
+  type        = string
+  description = "Owning team or Backstage owner reference."
 }
 
-variable "location" {
-  type = string
+variable "vpc_id" {
+  type        = string
+  description = "VPC ID where the RDS security group will be created."
 }
 
-variable "account_tier" { 
-  type = string
+variable "subnet_ids" {
+  type        = list(string)
+  description = "Private subnet IDs for the DB subnet group."
 }
 
-variable "account_replication_type" {
-  type = string
+variable "allowed_security_group_ids" {
+  type        = list(string)
+  description = "Security groups allowed to connect to Postgres."
+  default     = []
 }
 
-variable "access_tier" {
-  type = string
+variable "engine_version" {
+  type        = string
+  description = "PostgreSQL engine version."
+  default     = "16"
 }
 
-variable "container_name" {
-  type = string
+variable "instance_class" {
+  type        = string
+  description = "RDS instance class."
+  default     = "db.t4g.micro"
 }
 
-variable "container_access_type" {
-  type = string
+variable "allocated_storage" {
+  type        = number
+  description = "Initial allocated storage in GB."
+  default     = 20
+}
+
+variable "max_allocated_storage" {
+  type        = number
+  description = "Maximum autoscaled storage in GB."
+  default     = 100
+}
+
+variable "storage_type" {
+  type        = string
+  description = "RDS storage type."
+  default     = "gp3"
+}
+
+variable "database_name" {
+  type        = string
+  description = "Initial database name. Defaults to normalized service name."
+  default     = null
+}
+
+variable "db_username" {
+  type        = string
+  description = "Master DB username."
+  default     = "postgres_admin"
+}
+
+variable "multi_az" {
+  type        = bool
+  default     = false
+}
+
+variable "backup_retention_period" {
+  type        = number
+  default     = 7
+}
+
+variable "deletion_protection" {
+  type        = bool
+  default     = false
+}
+
+variable "publicly_accessible" {
+  type        = bool
+  default     = false
+}
+
+variable "skip_final_snapshot" {
+  type        = bool
+  default     = true
 }
 
 variable "tags" {
-  type    = map(string)
-  default = { environment = "dev" }
+  type        = map(string)
+  default     = {}
 }
