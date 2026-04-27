@@ -6,7 +6,7 @@ metadata:
   description: Provisions an S3 bucket using Terraform
 spec:
   owner: platform-team
-  type: service
+  type: resource
 
   # 1. The Form devs fill out
   parameters:

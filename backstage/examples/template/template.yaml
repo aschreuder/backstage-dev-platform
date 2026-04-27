@@ -38,37 +38,66 @@ spec:
           ui:options:
             allowedKinds: [Group]
 
-steps:
+  # These steps are executed in the scaffolder backend, using data that we gathered
+  # via the parameters above.
+  #steps:
+    # Each step executes an action, in this case one templates files into the working directory.
+  #  - id: fetch-base
+  #    name: Fetch Base
+  #    action: fetch:template
+  #    input:
+  #      url: ./content
+  #      values:
+  #        name: ${{ parameters.name }}
+
+  steps:
     - id: fetch-base
       name: Generating Service Files
       action: fetch:template
       input:
-        # This points to the folder containing your .tf, k8s, and Dockerfile
-        url: ./template 
-        
-        # This creates the new folder named after the component_id
+      # This points to the folder containing your .tf, k8s, and Dockerfile
+        url: ../../templates 
+      # This creates the new folder named after the component_id
         targetPath: ./${{ parameters.component_id }} 
-        
-        # These are the variables available to your skeleton files
-#        values:
-#          name: ${{ parameters.component_id }}
-#          language: ${{ parameters.language }}
-#         useDb: ${{ parameters.db }}
-#          owner: ${{ parameters.team }}
+      # These are the variables available to your skeleton files
+        values:
+          name: ${{ parameters.component_id }}
+          language: ${{ parameters.language }}
+          useDb: ${{ parameters.db }}
+          owner: ${{ parameters.team }}
 
+    # This step publishes the contents of the working directory to GitHub.
+    # If you or your organization prefer another default branch name over 'main'
+    # you can change that here.
 #    - id: publish
-#      name: Publishing to GitHub
+#      name: Publish
 #      action: publish:github
 #      input:
-#        allowedHosts: ['github.com']
-#        description: 'New microservice for ${{ parameters.component_id }}'
-        # This creates a repo with the same name as the service
-#        repoUrl: 'github.com?aschreuder&repo=${{ parameters.component_id }}'
+#        description: This is ${{ parameters.name }}
+#        repoUrl: ${{ parameters.repoUrl }}
+#        defaultBranch: 'main'
 
+    - id: publish
+      name: Publishing to GitHub
+      action: publish:github
+      input:
+        #allowedHosts: ['github.com']
+        description: 'New microservice for ${{ parameters.component_id }}'
+        # This creates a repo with the same name as the service
+        repoUrl: 'github.com?owner=aschreuder&repo=${{ parameters.component_id }}'
+
+    # The final step is to register our new component in the catalog.
 #    - id: register
-#      name: Registering in Catalog
+#      name: Register
 #      action: catalog:register
 #      input:
+#        repoContentsUrl: ${{ steps['publish'].output.repoContentsUrl }}
+#        catalogInfoPath: '/catalog-info.yaml'
+
+    - id: register
+      name: Registering in Catalog
+      action: catalog:register
+      input:
         # This points to the catalog-info.yaml inside the new folder
- #       repoContentsUrl: ${{ steps['publish'].output.remoteRepoUrl }}
- #       catalogInfoPath: '/${{ parameters.component_id }}/catalog-info.yaml'
+        repoContentsUrl: ${{ steps['publish'].output.remoteRepoUrl }}
+        catalogInfoPath: '/${{ parameters.component_id }}/catalog-info.yaml'

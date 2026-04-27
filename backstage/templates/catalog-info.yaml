@@ -1,8 +1,12 @@
 apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
-  name: ${{ values.name }}
+  name: ${{ values.name | dump }}
+  description: "Microservice created via Backstage"
+  # Optional: adds links to the repo automatically
+  annotations:
+    github.com/project-slug: aschreuder/${{ values.name }}
 spec:
   type: service
   lifecycle: experimental
-  owner: ${{ values.owner }}
+  owner: ${{ values.owner | dump }}

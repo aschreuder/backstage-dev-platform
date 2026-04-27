@@ -1,5 +1,5 @@
 app:
-  title: Scaffolded Backstage App
+  title: Backstage Dev Platform
   baseUrl: http://localhost:3000
 
   # Enable all packages by default, this will discover packages from packages/app/package.json
@@ -121,24 +121,33 @@ catalog:
     entityFilename: catalog-info.yaml
     pullRequestBranchName: backstage-integration
   rules:
-    - allow: [Component, System, API, Resource, Location]
+    - allow: [Component, System, API, Resource, Location, Template]
   locations:
     # Local example data, file locations are relative to the backend process, typically `packages/backend`
     - type: file
       target: ../../examples/entities.yaml
 
-    # Catalog template
+    # Template file for microservices
     - type: file
-      target: template.yaml
+      target: ../../template.yaml
+      rules:
+        - allow: [Resource]
+
+    # Template file for creating an S3 bucket
+    - type: file
+      target: ../../s3-template.yaml
+      rules:
+        - allow: [Template]
+
 
     - type: url
       target: https://github.com/aschreuder/backstage-dev-platform/blob/main/backstage/template.yaml
 
     # Local example template
-    - type: file
-      target: ../../examples/template/template.yaml
-      rules:
-        - allow: [Template]
+    #- type: file
+    #  target: ../../examples/template/template.yaml
+    #  rules:
+    #    - allow: [Template]
 
     # Local example organizational data
     - type: file
