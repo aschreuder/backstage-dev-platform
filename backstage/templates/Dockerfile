@@ -9,4 +9,3 @@ FROM node:20-slim
 {% endif %}
 
 WORKDIR /app
-# ... rest of your Dockerfile
